@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý xe - QL Vận Tải{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="page-heading">
+    <div>
+        <h1>🚌 Quản lý danh sách xe</h1>
+        <p>Tra cứu và quản lý phương tiện vận tải.</p>
+    </div>
+
+    <div class="page-actions">
+
+        <div class="count-badge">
+            {% if tu_khoa %}
+            Tìm thấy: {{ danh_sach | length }} xe
+            {% else %}
+            Tổng số: {{ danh_sach | length }} xe
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('them_xe') }}" class="btn btn-primary">
+            ➕ Thêm xe
+        </a>
+
+    </div>
+</div>
+
+
+<!-- KHU VỰC TÌM KIẾM -->
+
+<div class="search-card">
+
+    <form action="{{ url_for('danh_sach_xe') }}" method="GET" class="search-form">
+
+        <div class="search-field">
+            <label for="q">Tìm kiếm theo biển số</label>
+
+            <input type="text" id="q" name="q" placeholder="Ví dụ: 29A-12345" value="{{ tu_khoa }}" maxlength="15">
+        </div>
+
+        <div class="search-actions">
+
+            <button type="submit" class="btn btn-primary">
+                🔍 Tìm kiếm
+            </button>
+
+            <a href="{{ url_for('danh_sach_xe') }}" class="btn btn-secondary">
+                🔄 Xóa bộ lọc
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- BẢNG DANH SÁCH XE -->
+
+<div class="table-card">
+
+    <div class="table-header">
+        <div>
+            <h2>Danh sách phương tiện</h2>
+            <p>Dữ liệu trực tiếp từ bảng XE trong MySQL.</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="data-table">
+
+            <thead>
+                <tr>
+                    <th>Mã xe</th>
+                    <th>Biển số</th>
+                    <th>Hãng sản xuất</th>
+                    <th>Model</th>
+                    <th>Năm sản xuất</th>
+                    <th>Số chỗ</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for xe in danh_sach %}
+
+                <tr>
+                    <td>{{ xe.MaXe }}</td>
+
+                    <td>
+                        <strong>{{ xe.BienSo }}</strong>
+                    </td>
+
+                    <td>{{ xe.HangSanXuat }}</td>
+
+                    <td>{{ xe.Model }}</td>
+
+                    <td>{{ xe.NamSanXuat }}</td>
+
+                    <td>{{ xe.SoChoNgoi }}</td>
+
+                    <td>
+                        {% if xe.TrangThai %}
+
+                        <span class="status-badge status-active">
+                            ● Hoạt động
+                        </span>
+
+                        {% else %}
+
+                        <span class="status-badge status-inactive">
+                            ● Ngừng hoạt động
+                        </span>
+
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <!-- NÚT SỬA -->
+                        <a href="{{ url_for('sua_xe', ma_xe=xe.MaXe) }}" class="btn btn_edit">
+                            ✏️ Sửa
+                        </a>
+                        <!-- NÚT XÓA -->
+                        <form action="{{url_for('xoa_xe',ma_xe=xe.MaXe)}}" method="POST" style="display: inline;"
+                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa xe {{ xe.BienSo }} không?');">
+                            <button type="submit" class="btn btn-delete">
+                                🗑️ Xóa
+                            </button>
+                        </form>
+                    </td>
+
+
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="8" class="empty-state">
+
+                        {% if tu_khoa %}
+
+                        Không tìm thấy xe có biển số chứa
+                        "<strong>{{ tu_khoa }}</strong>".
+
+                        {% else %}
+
+                        Chưa có dữ liệu xe.
+
+                        {% endif %}
+
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

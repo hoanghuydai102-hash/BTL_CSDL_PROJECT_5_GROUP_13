@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - QL Vận Tải{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <h1>📊 Tổng quan hệ thống</h1>
+        <p>Thống kê dữ liệu vận tải hành khách đường dài.</p>
+    </div>
+</div>
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-label">Tổng số xe</div>
+        <div class="stat-value">{{ so_xe }}</div>
+        <div class="stat-note">Dữ liệu từ bảng XE</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Tài xế</div>
+        <div class="stat-value">{{ so_tai_xe }}</div>
+        <div class="stat-note">Dữ liệu từ bảng TAI_XE</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Tuyến đường</div>
+        <div class="stat-value">{{ so_tuyen }}</div>
+        <div class="stat-note">Dữ liệu từ bảng TUYEN_DUONG</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Chuyến xe</div>
+        <div class="stat-value">{{ so_chuyen }}</div>
+        <div class="stat-note">Dữ liệu từ bảng CHUYEN_XE</div>
+    </div>
+
+</div>
+
+<div class="info-panel">
+    <h2>Giới thiệu hệ thống</h2>
+    <p>
+        Hệ thống quản lý vận tải hành khách đường dài được xây dựng
+        bằng Python Flask và MySQL, phục vụ việc quản lý phương tiện,
+        tài xế, tuyến đường, chuyến xe và hoạt động bảo dưỡng.
+    </p>
+    <p>
+        Các chức năng thống kê lương, doanh thu và lịch bảo dưỡng
+        sẽ được tích hợp trong những bước tiếp theo.
+    </p>
+</div>
+
+{% endblock %}

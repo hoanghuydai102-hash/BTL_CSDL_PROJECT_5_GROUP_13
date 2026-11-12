@@ -1,0 +1,1 @@
+console.log("JavaScript quản lý vận tải đã hoạt động!");

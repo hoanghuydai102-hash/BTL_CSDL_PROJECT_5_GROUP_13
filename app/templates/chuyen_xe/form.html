@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if che_do|default('them') == 'sua' %}
+Sửa chuyến xe
+{% else %}
+Thêm chuyến xe
+{% endif %}
+- QL Vận Tải
+{% endblock %}
+
+{% block content %}
+
+<div class="chuyen-xe-container">
+
+    <!-- =====================================================
+         TIÊU ĐỀ
+    ===================================================== -->
+
+    <div class="page-heading">
+
+        <div>
+
+            {% if che_do|default('them') == 'sua' %}
+
+            <h1>✏️ Sửa chuyến xe #{{ ma_chuyen }}</h1>
+            <p>Cập nhật thông tin chuyến xe trong hệ thống.</p>
+
+            {% else %}
+
+            <h1>➕ Thêm chuyến xe</h1>
+            <p>Nhập thông tin để tạo chuyến xe mới.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- THÔNG BÁO LỖI -->
+
+    {% if loi %}
+
+    <div class="alert alert-danger">
+        {{ loi }}
+    </div>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         FORM THÊM / SỬA
+    ===================================================== -->
+
+    <form
+        action="{% if che_do|default('them') == 'sua' %}{{ url_for('sua_chuyen_xe', ma_chuyen=ma_chuyen) }}{% else %}{{ url_for('them_chuyen_xe') }}{% endif %}"
+        method="POST" class="chuyen-xe-form">
+
+        <div class="chuyen-xe-form-grid">
+
+            <!-- XE -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="MaXe">
+                    Xe <span>*</span>
+                </label>
+
+                <select name="MaXe" id="MaXe" required>
+
+                    <option value="">-- Chọn xe --</option>
+
+                    {% for xe in danh_sach_xe %}
+
+                    <option value="{{ xe.MaXe }}" data-so-ghe="{{  xe.SoChoNgoi  }}" {% if du_lieu.MaXe==xe.MaXe|string
+                        %} selected {% endif %} {% if not xe.TrangThai and du_lieu.MaXe !=xe.MaXe|string %} disabled {%
+                        endif %}>
+
+                        {{ xe.BienSo }} ({{ xe.SoChoNgoi }} chỗ)
+
+                        {% if not xe.TrangThai %}
+                        - Ngừng hoạt động
+                        {% endif %}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- TÀI XẾ CHÍNH -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="MaTaiXe">
+                    Tài xế chính <span>*</span>
+                </label>
+
+                <select name="MaTaiXe" id="MaTaiXe" required>
+
+                    <option value="">-- Chọn tài xế --</option>
+
+                    {% for tx in danh_sach_tai_xe %}
+
+                    <option value="{{ tx.MaTaiXe }}" {% if du_lieu.MaTaiXe==tx.MaTaiXe|string %} selected {% endif %} {%
+                        if tx.TrangThai !='Đang làm việc' and du_lieu.MaTaiXe !=tx.MaTaiXe|string %} disabled {% endif
+                        %}>
+
+                        {{ tx.HoTen }}
+
+                        {% if tx.TrangThai != 'Đang làm việc' %}
+                        - {{ tx.TrangThai }}
+                        {% endif %}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- PHỤ XE -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="MaPhuXe">
+                    Phụ xe <span>*</span>
+                </label>
+
+                <select name="MaPhuXe" id="MaPhuXe" required>
+
+                    <option value="">-- Chọn phụ xe --</option>
+
+                    {% for tx in danh_sach_tai_xe %}
+
+                    <option value="{{ tx.MaTaiXe }}" {% if du_lieu.MaPhuXe==tx.MaTaiXe|string %} selected {% endif %} {%
+                        if tx.TrangThai !='Đang làm việc' and du_lieu.MaPhuXe !=tx.MaTaiXe|string %} disabled {% endif
+                        %}>
+
+                        {{ tx.HoTen }}
+
+                        {% if tx.TrangThai != 'Đang làm việc' %}
+                        - {{ tx.TrangThai }}
+                        {% endif %}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- TUYẾN ĐƯỜNG -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="MaTuyenDuong">
+                    Tuyến đường <span>*</span>
+                </label>
+
+                <select name="MaTuyenDuong" id="MaTuyenDuong" required>
+
+                    <option value="">-- Chọn tuyến đường --</option>
+
+                    {% for tuyen in danh_sach_tuyen %}
+
+                    <option value="{{ tuyen.MaTuyenDuong }}" {% if du_lieu.MaTuyenDuong==tuyen.MaTuyenDuong|string %}
+                        selected {% endif %} {% if not tuyen.TrangThai and du_lieu.MaTuyenDuong
+                        !=tuyen.MaTuyenDuong|string %} disabled {% endif %}>
+
+                        {{ tuyen.DiemDi }} → {{ tuyen.DiemDen }}
+
+                        {% if not tuyen.TrangThai %}
+                        - Ngừng hoạt động
+                        {% endif %}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- SỐ KHÁCH -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="SoKhach">
+                    Số khách <span>*</span>
+                </label>
+
+                <input type="number" name="SoKhach" id="SoKhach" min="0" step="1" value="{{ du_lieu.SoKhach }}"
+                    required>
+
+            </div>
+
+
+            <!-- THỜI GIAN KHỞI HÀNH -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="ThoiGianKhoiHanh">
+                    Thời gian khởi hành <span>*</span>
+                </label>
+
+                <input type="datetime-local" name="ThoiGianKhoiHanh" id="ThoiGianKhoiHanh"
+                    value="{{ du_lieu.ThoiGianKhoiHanh }}" required>
+
+            </div>
+
+
+            <!-- SỐ KM THỰC TẾ -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="SoKmThucTe">
+                    Số km thực tế <span>*</span>
+                </label>
+
+                <input type="number" name="SoKmThucTe" id="SoKmThucTe" min="0" step="0.01"
+                    value="{{ du_lieu.SoKmThucTe }}" required>
+
+            </div>
+
+
+            <!-- GIÁ VÉ -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="GiaVe">
+                    Giá vé (VNĐ) <span>*</span>
+                </label>
+
+                <input type="number" name="GiaVe" id="GiaVe" min="0.01" step="0.01" value="{{ du_lieu.GiaVe }}"
+                    required>
+
+            </div>
+
+
+            <!-- TRẠNG THÁI -->
+            <div class="chuyen-xe-form-field">
+
+                <label for="TrangThai">
+                    Trạng thái <span>*</span>
+                </label>
+
+                <select name="TrangThai" id="TrangThai" required>
+
+                    {% for tt in [
+                    'Đã lên lịch',
+                    'Đang chạy',
+                    'Đã hoàn thành',
+                    'Đã hủy'
+                    ] %}
+
+                    <option value="{{ tt }}" {% if du_lieu.TrangThai==tt %} selected {% endif %}>
+                        {{ tt }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             NÚT THAO TÁC
+        ===================================================== -->
+
+        <div class="chuyen-xe-form-actions">
+
+            <button type="submit" class="chuyen-xe-btn-search">
+
+                {% if che_do|default('them') == 'sua' %}
+                💾 Lưu thay đổi
+                {% else %}
+                💾 Thêm chuyến xe
+                {% endif %}
+
+            </button>
+
+            <a href="{{ url_for('danh_sach_chuyen_xe') }}" class="chuyen-xe-btn-reset">
+                Hủy
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

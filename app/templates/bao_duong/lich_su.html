@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}
+Lịch sử bảo dưỡng - QL Vận Tải
+{% endblock %}
+
+{% block content %}
+
+<div class="bao-duong-container">
+
+    <!-- =====================================================
+         TIÊU ĐỀ
+    ===================================================== -->
+
+    <div class="page-heading">
+
+        <div>
+            <h1>📜 Lịch sử bảo dưỡng xe</h1>
+
+            <p>
+                Theo dõi toàn bộ các lần bảo dưỡng
+                của các xe khách trong hệ thống.
+            </p>
+        </div>
+
+        <div class="page-actions">
+
+            <a href="{{ url_for('danh_sach_bao_duong') }}" class="bao-duong-btn-back">
+                ← Quay lại
+            </a>
+
+            <a href="{{ url_for('them_bao_duong') }}" class="bao-duong-btn-add">
+                ➕ Thêm bảo dưỡng
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         THỐNG KÊ
+    ===================================================== -->
+
+    <div class="bao-duong-history-stats">
+
+        <div class="bao-duong-stat-card">
+
+            <span>📋 Tổng số phiếu</span>
+
+            <strong>{{ tong_phieu }}</strong>
+
+        </div>
+
+        <div class="bao-duong-stat-card">
+
+            <span>✅ Phiếu hoàn thành</span>
+
+            <strong>{{ so_phieu_hoan_thanh }}</strong>
+
+        </div>
+
+        <div class="bao-duong-stat-card">
+
+            <span>💰 Tổng chi phí bảo dưỡng</span>
+
+            <strong>
+                {{ "{:,.0f}".format(tong_chi_phi) }} đ
+            </strong>
+
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         FORM TÌM KIẾM
+    ===================================================== -->
+
+    <form action="{{ url_for('lich_su_bao_duong') }}" method="GET" class="bao-duong-history-search">
+
+        <div class="bao-duong-search-group">
+
+            <label for="bien_so">
+                🔎 Biển số xe
+            </label>
+
+            <input type="text" id="bien_so" name="bien_so" placeholder="Nhập biển số xe..." value="{{ bien_so }}">
+
+        </div>
+
+        <div class="bao-duong-search-group">
+
+            <label for="trang_thai">
+                🔄 Trạng thái
+            </label>
+
+            <select id="trang_thai" name="trang_thai">
+
+                <option value="">
+                    -- Tất cả trạng thái --
+                </option>
+
+                {% for tt in [
+                'Đang chờ',
+                'Đang bảo dưỡng',
+                'Hoàn thành'
+                ] %}
+
+                <option value="{{ tt }}" {% if trang_thai==tt %} selected {% endif %}>
+                    {{ tt }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="bao-duong-search-actions">
+
+            <button type="submit" class="bao-duong-btn-add">
+                🔍 Tìm kiếm
+            </button>
+
+            <a href="{{ url_for('lich_su_bao_duong') }}" class="bao-duong-btn-back">
+                ↺ Đặt lại
+            </a>
+
+        </div>
+
+    </form>
+
+    <!-- =====================================================
+         BẢNG LỊCH SỬ BẢO DƯỠNG
+    ===================================================== -->
+
+    <div class="bao-duong-table-section">
+
+        <div class="bao-duong-table-heading">
+
+            <h2>📋 Danh sách phiếu bảo dưỡng</h2>
+
+            <span>{{ danh_sach | length }} kết quả</span>
+
+        </div>
+
+        <div class="table-wrapper">
+
+            <table class="bao-duong-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Mã phiếu</th>
+                        <th>Biển số xe</th>
+                        <th>Ngày bảo dưỡng</th>
+                        <th>Nội dung</th>
+                        <th>Chi phí</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for bd in danh_sach %}
+
+                    <tr>
+
+                        <td>
+                            <strong>#{{ bd.MaBaoDuong }}</strong>
+                        </td>
+
+                        <td>
+                            <strong>{{ bd.BienSo }}</strong>
+                        </td>
+
+                        <td>
+                            {{ bd.ThoiGianBaoDuong.strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+
+                        <td class="bao-duong-history-content">
+                            {{ bd.NoiDung }}
+                        </td>
+
+                        <td>
+                            {{ "{:,.0f}".format(bd.ChiPhi) }} đ
+                        </td>
+
+                        <td>
+
+                            {% if bd.TrangThai == 'Hoàn thành' %}
+
+                            <span class="bao-duong-status success">
+                                ✅ Hoàn thành
+                            </span>
+
+                            {% elif bd.TrangThai == 'Đang bảo dưỡng' %}
+
+                            <span class="bao-duong-status warning">
+                                🔧 Đang bảo dưỡng
+                            </span>
+
+                            {% else %}
+
+                            <span class="bao-duong-status pending">
+                                ⏳ Đang chờ
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <!-- =====================================================
+                            THAO TÁC: SỬA / XÓA PHIẾU BẢO DƯỠNG
+                            ===================================================== -->
+
+                        <td>
+
+                            <div class="bao-duong-action-group">
+
+                                <!-- NÚT SỬA -->
+                                <a href="{{ url_for('sua_bao_duong', ma_bao_duong=bd.MaBaoDuong) }}"
+                                    class="bao-duong-btn-edit">
+                                    ✏️ Sửa
+                                </a>
+
+                                <!-- NÚT XÓA -->
+                                <form action="{{ url_for('xoa_bao_duong', ma_bao_duong=bd.MaBaoDuong) }}" method="POST"
+                                    class="bao-duong-delete-form" onsubmit="return xacNhanXoaBaoDuong(
+                                        '{{ bd.MaBaoDuong }}',
+                                        '{{ bd.BienSo }}',
+                                        '{{ bd.TrangThai }}'
+                                    );">
+
+                                    <button type="submit" class="bao-duong-btn-delete">
+                                        🗑️ Xóa
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="7" class="empty-message">
+                            Chưa có lịch sử bảo dưỡng phù hợp.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // =====================================================
+    // 11.6 - XÁC NHẬN XÓA PHIẾU BẢO DƯỠNG
+    // =====================================================
+
+    function xacNhanXoaBaoDuong(maPhieu, bienSo, trangThai) {
+
+        let thongBao =
+            "Bạn có chắc chắn muốn xóa phiếu bảo dưỡng #" +
+            maPhieu +
+            " của xe " +
+            bienSo +
+            "?\n\n";
+
+        // Cảnh báo nếu phiếu đã hoàn thành
+        if (trangThai === "Hoàn thành") {
+
+            thongBao +=
+                "⚠️ CẢNH BÁO:\n" +
+                "Phiếu này đã hoàn thành bảo dưỡng.\n" +
+                "Việc xóa có thể làm thay đổi ngày bảo dưỡng " +
+                "tiếp theo của xe.\n\n";
+        }
+
+        thongBao +=
+            "Dữ liệu đã xóa sẽ không thể khôi phục " +
+            "bằng chức năng của hệ thống.\n\n" +
+            "Bạn có muốn tiếp tục?";
+
+        return confirm(thongBao);
+    }
+</script>
+
+{% endblock %}

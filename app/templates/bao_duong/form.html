@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if che_do == 'sua' %}
+Sửa bảo dưỡng - QL Vận Tải
+{% else %}
+Thêm bảo dưỡng - QL Vận Tải
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="bao-duong-form-container">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="page-heading">
+
+        <div>
+            {% if che_do == 'sua' %}
+
+            <h1>✏️ Sửa phiếu bảo dưỡng #{{ bao_duong.MaBaoDuong }}</h1>
+
+            {% else %}
+
+            <h1>🔧 Thêm phiếu bảo dưỡng</h1>
+
+            {% endif %}
+
+            <p>
+                Ghi nhận thông tin bảo dưỡng xe khách.
+            </p>
+        </div>
+
+        <a href="{{ url_for('lich_su_bao_duong') if che_do == 'sua' else url_for('danh_sach_bao_duong') }}"
+            class="bao-duong-btn-back">
+            ← Quay lại
+        </a>
+
+    </div>
+
+    <!-- FORM -->
+    <div class="bao-duong-form-card">
+
+        <form
+            action="{% if che_do == 'sua' %}{{ url_for('sua_bao_duong', ma_bao_duong=bao_duong.MaBaoDuong) }}{% else %}{{ url_for('them_bao_duong') }}{% endif %}"
+            method="POST" class="bao-duong-form">
+
+            <!-- CHỌN XE -->
+            <div class="bao-duong-form-group">
+
+                <label for="ma_xe">
+                    🚍 Chọn xe <span class="required">*</span>
+                </label>
+
+                <select id="ma_xe" name="ma_xe" required>
+
+                    <option value="">
+                        -- Chọn xe cần bảo dưỡng --
+                    </option>
+
+                    {% for xe in danh_sach_xe %}
+
+                    <option value="{{ xe.MaXe }}" {% if bao_duong.get('MaXe')|string==xe.MaXe|string %} selected {%
+                        endif %}>
+                        {{ xe.BienSo }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <!-- NGÀY GIỜ -->
+            <div class="bao-duong-form-group">
+
+                <label for="thoi_gian">
+                    📅 Ngày giờ bảo dưỡng
+                    <span class="required">*</span>
+                </label>
+
+                <input type="datetime-local" id="thoi_gian" name="thoi_gian"
+                    value="{{ bao_duong.get('ThoiGianBaoDuong', '') }}" required>
+
+            </div>
+
+            <!-- NỘI DUNG -->
+            <div class="bao-duong-form-group">
+
+                <label for="noi_dung">
+                    📝 Nội dung bảo dưỡng
+                    <span class="required">*</span>
+                </label>
+
+                <textarea id="noi_dung" name="noi_dung" rows="4" maxlength="200"
+                    placeholder="Ví dụ: Thay dầu, kiểm tra phanh, bảo dưỡng động cơ..."
+                    required>{{ bao_duong.get('NoiDung', '') }}</textarea>
+
+            </div>
+
+            <!-- CHI PHÍ -->
+            <div class="bao-duong-form-group">
+
+                <label for="chi_phi">
+                    💰 Chi phí bảo dưỡng (VNĐ)
+                    <span class="required">*</span>
+                </label>
+
+                <input type="number" id="chi_phi" name="chi_phi" min="0" step="0.01"
+                    value="{{ bao_duong.get('ChiPhi', '') }}" placeholder="Ví dụ: 1500000" required>
+
+            </div>
+
+            <!-- TRẠNG THÁI -->
+            <div class="bao-duong-form-group">
+
+                <label for="trang_thai">
+                    🔄 Trạng thái
+                    <span class="required">*</span>
+                </label>
+
+                <select id="trang_thai" name="trang_thai" required>
+
+                    {% for tt in [
+                    'Đang chờ',
+                    'Đang bảo dưỡng',
+                    'Hoàn thành'
+                    ] %}
+
+                    <option value="{{ tt }}" {% if bao_duong.get('TrangThai', 'Đang chờ' )==tt %} selected {% endif %}>
+                        {{ tt }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <!-- NÚT -->
+            <div class="bao-duong-form-actions">
+
+                <button type="submit" class="bao-duong-btn-save">
+
+                    {% if che_do == 'sua' %}
+                    💾 Lưu thay đổi
+                    {% else %}
+                    ➕ Thêm bảo dưỡng
+                    {% endif %}
+
+                </button>
+
+                <a href="{{ url_for('lich_su_bao_duong') if che_do == 'sua' else url_for('danh_sach_bao_duong') }}"
+                    class="bao-duong-btn-cancel">
+                    Hủy bỏ
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

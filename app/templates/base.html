@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}QL Vận Tải{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">🚌</span>
+                <div>
+                    <strong>QL VẬN TẢI</strong>
+                    <small>Passenger Transport</small>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    📊 Dashboard
+                </a>
+
+                <a href="{{ url_for('danh_sach_xe') }}"
+                    class="{% if request.endpoint == 'danh_sach_xe' %}active{% endif %}">
+                    🚌 Quản lý xe
+                </a>
+
+                <a href="{{ url_for('danh_sach_tai_xe') }}">
+                    👨‍✈️ Quản lý tài xế
+                </a>
+
+                <a href="{{ url_for('danh_sach_tuyen_duong') }}">
+                    🛣️ Quản lý tuyến đường
+                </a>
+
+                <a href="{{ url_for('danh_sach_chuyen_xe') }}"
+                    class="{% if request.endpoint == 'danh_sach_chuyen_xe' %}active{% endif %}">
+                    📅 Quản lý chuyến xe
+                </a>
+
+                <a href="{{ url_for('danh_sach_bao_duong') }}" class="nav-link {% if request.endpoint in [
+                    'danh_sach_bao_duong',
+                    'danh_sach_xe_qua_han',
+                    'them_bao_duong',
+                    'lich_su_bao_duong',
+                    'sua_bao_duong'
+                    ] %}active{% endif %}">
+                    🔧 Quản lý bảo dưỡng
+                </a>
+
+                <a href="{{ url_for('bang_luong') }}"
+                    class="sidebar-link {% if request.endpoint == 'bang_luong' %}active{% endif %}">
+                    <span>💰</span>
+                    <span>Bảng lương</span>
+                </a>
+
+                <a href="{{ url_for('doanh_thu') }}"
+                    class="sidebar-link {% if request.endpoint == 'doanh_thu' %}active{% endif %}">
+                    <span>📈</span>
+                    <span>Doanh thu</span>
+                </a>
+
+                <div class="nav-heading">CHỨC NĂNG SẮP TRIỂN KHAI</div>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                BTL Cơ sở dữ liệu<br>
+                PROJECT 5
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-area">
+
+            <header class="topbar">
+                <div>
+                    <strong>Hệ thống quản lý vận tải hành khách</strong>
+                    <span>Ứng dụng quản trị dữ liệu MySQL</span>
+                </div>
+
+                <div class="topbar-badge">● Local System</div>
+            </header>
+
+            <main class="page-content">
+
+                <!-- HIEN THI THONG BAO THANH CONG / THAT BAI -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <!-- NOI DUNG CHINH CUA TRANG -->
+                {% block content %}{% endblock %}
+
+            </main>
+
+        </div>
+    </div>
+
+    <!-- JavaScript dùng chung cho toàn bộ website -->
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer>
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if che_do == "sua" %}
+Sửa xe - QL Vận Tải
+{% else %}
+Thêm xe - QL Vận Tải
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        {% if che_do == "sua" %}
+        <h1>✏️ Sửa thông tin xe</h1>
+        <p>Cập nhật dữ liệu phương tiện trong MySQL.</p>
+        {% else %}
+        <h1>➕ Thêm xe mới</h1>
+        <p>Nhập thông tin phương tiện để lưu vào MySQL.</p>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('danh_sach_xe') }}" class="btn btn-secondary">
+        ← Quay lại
+    </a>
+</div>
+
+<div class="form-card">
+
+    {% if loi %}
+    <div class="alert alert-error">
+        {{ loi }}
+    </div>
+    {% endif %}
+
+    {% if che_do == "sua" %}
+    <form method="POST" action="{{ url_for('sua_xe', ma_xe=ma_xe) }}">
+        {% else %}
+        <form method="POST" action="{{ url_for('them_xe') }}">
+            {% endif %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="BienSo">Biển số xe *</label>
+                    <input type="text" id="BienSo" name="BienSo" maxlength="15" value="{{ du_lieu.BienSo }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="MauSac">Màu sắc *</label>
+                    <input type="text" id="MauSac" name="MauSac" maxlength="30" value="{{ du_lieu.MauSac }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="HangSanXuat">Hãng sản xuất *</label>
+                    <input type="text" id="HangSanXuat" name="HangSanXuat" maxlength="50"
+                        value="{{ du_lieu.HangSanXuat }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="DoiXe">Đời xe *</label>
+                    <input type="text" id="DoiXe" name="DoiXe" maxlength="50" value="{{ du_lieu.DoiXe }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Model">Model *</label>
+                    <input type="text" id="Model" name="Model" maxlength="50" value="{{ du_lieu.Model }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="NamSanXuat">Năm sản xuất *</label>
+                    <input type="number" id="NamSanXuat" name="NamSanXuat" min="1901" max="2155"
+                        value="{{ du_lieu.NamSanXuat }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="SoChoNgoi">Số chỗ ngồi *</label>
+                    <input type="number" id="SoChoNgoi" name="SoChoNgoi" min="3" value="{{ du_lieu.SoChoNgoi }}"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="TrangThai">Trạng thái *</label>
+
+                    <select id="TrangThai" name="TrangThai" required>
+
+                        <option value="1" {% if du_lieu.TrangThai=='1' %} selected {% endif %}>
+                            Hoạt động
+                        </option>
+
+                        <option value="0" {% if du_lieu.TrangThai=='0' %} selected {% endif %}>
+                            Ngừng hoạt động
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <a href="{{ url_for('danh_sach_xe') }}" class="btn btn-secondary">
+                    Hủy
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+
+                    {% if che_do == "sua" %}
+                    💾 Lưu thay đổi
+                    {% else %}
+                    ➕ Thêm xe
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+# Moi truong ao Python
+.venv/
+venv/
+env/
+
+# File Python tu sinh khi chay app
+__pycache__/
+*.pyc
+*.pyo
+
+# File cau hinh nhay cam
+.env
+.env.local
+
+# File he thong / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# File tam cua Word
+~$*.docx
+
+# File log va file tam
+*.log
+*.tmp
+# File sao luu CSDL
+backup/
+
+# Code sao luu cu
+app/app_before/

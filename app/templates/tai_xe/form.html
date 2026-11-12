@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>{{ tieu_de }}</h1>
+</div>
+
+<div class="card">
+
+    <form action="{% if ma_tai_xe is defined %}
+                {{ url_for('sua_tai_xe', ma_tai_xe=ma_tai_xe) }}
+            {% else %}
+                {{ url_for('them_tai_xe') }}
+            {% endif %}" method="POST" class="driver-form">
+
+        <div class="driver-form-grid">
+
+            <div class="form-group">
+                <label>Họ và tên *</label>
+                <input type="text" name="HoTen" maxlength="100" required value="{{ tai_xe.get('HoTen', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Số CCCD *</label>
+                <input type="text" name="SoCCCD" maxlength="12" pattern="[0-9]{12}" required
+                    value="{{ tai_xe.get('SoCCCD', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Số bằng lái *</label>
+                <input type="text" name="SoBangLai" maxlength="20" required value="{{ tai_xe.get('SoBangLai', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Loại bằng lái *</label>
+                <input type="text" name="LoaiBangLai" maxlength="10" required placeholder="Ví dụ: D, E"
+                    value="{{ tai_xe.get('LoaiBangLai', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Địa chỉ *</label>
+                <input type="text" name="DiaChi" maxlength="200" required value="{{ tai_xe.get('DiaChi', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Ngày sinh *</label>
+                <input type="date" name="NgaySinh" required value="{{ tai_xe.get('NgaySinh', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Ngày vào nghề *</label>
+                <input type="date" name="NgayVaoNghe" required value="{{ tai_xe.get('NgayVaoNghe', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Số điện thoại *</label>
+                <input type="tel" name="SDT" maxlength="10" pattern="0[0-9]{9}" required
+                    value="{{ tai_xe.get('SDT', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" name="Email" maxlength="100" required value="{{ tai_xe.get('Email', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label>Trạng thái *</label>
+
+                <select name="TrangThai" required>
+                    {% for tt in [
+                    'Đang làm việc',
+                    'Nghỉ phép',
+                    'Tạm nghỉ',
+                    'Đã nghỉ việc'
+                    ] %}
+                    <option value="{{ tt }}" {% if tai_xe.get('TrangThai', 'Đang làm việc' )==tt %} selected {% endif
+                        %}>
+                        {{ tt }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="driver-form-actions">
+            <button type="submit" class="btn btn-primary">
+                💾 Lưu tài xế
+            </button>
+
+            <a href="{{ url_for('danh_sach_tai_xe') }}" class="btn btn-secondary">
+                Hủy
+            </a>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

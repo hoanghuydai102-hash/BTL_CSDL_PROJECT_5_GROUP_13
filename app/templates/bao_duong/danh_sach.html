@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}
+Quản lý bảo dưỡng - QL Vận Tải
+{% endblock %}
+
+{% block content %}
+
+<div class="bao-duong-container">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="page-heading">
+
+        <div>
+            <h1>🔧 Quản lý bảo dưỡng xe</h1>
+
+            <p>
+                Theo dõi lịch bảo dưỡng và tình trạng
+                bảo dưỡng của các xe khách.
+            </p>
+        </div>
+
+        <div class="page-actions">
+
+            {% if che_do_danh_sach|default('tat_ca') == 'qua_han' %}
+
+            <a href="{{ url_for('danh_sach_bao_duong') }}" class="bao-duong-btn-back">
+                ← Quay lại danh sách
+            </a>
+
+            {% else %}
+
+            <a href="{{ url_for('them_bao_duong') }}" class="bao-duong-btn-add">
+                ➕ Thêm bảo dưỡng
+            </a>
+
+            <a href="{{ url_for('lich_su_bao_duong') }}" class="bao-duong-btn-history">
+                📜 Lịch sử bảo dưỡng
+            </a>
+
+            <a href="{{ url_for('danh_sach_xe_qua_han') }}" class="bao-duong-btn-overdue">
+                🚨 Xe quá hạn
+            </a>
+
+            {% endif %}
+
+            <div class="count-badge">
+                Tổng hiển thị: {{ danh_sach | length }} xe
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="bao-duong-stats">
+
+        <div class="bao-duong-stat-card">
+            <span>Tổng số xe</span>
+            <strong>{{ danh_sach | length }}</strong>
+        </div>
+
+        <div class="bao-duong-stat-card bao-duong-stat-danger">
+            <span>Xe quá hạn bảo dưỡng</span>
+            <strong>{{ so_xe_qua_han }}</strong>
+        </div>
+
+    </div>
+
+    <!-- BẢNG LỊCH BẢO DƯỠNG -->
+    <div class="bao-duong-table-section">
+
+        <div class="bao-duong-table-heading">
+            {% if che_do_danh_sach|default('tat_ca') == 'qua_han' %}
+            <h2>🚨 Danh sách xe quá hạn bảo dưỡng</h2>
+            {% else %}
+            <h2>📋 Lịch bảo dưỡng xe</h2>
+            {% endif %}
+        </div>
+
+        <div class="table-wrapper">
+
+            <table class="bao-duong-table">
+
+                <thead>
+                    <tr>
+                        <th>Mã xe</th>
+                        <th>Biển số</th>
+                        <th>Bảo dưỡng gần nhất</th>
+                        <th>Km quy đổi</th>
+                        <th>Số ngày giảm</th>
+                        <th>Bảo dưỡng tiếp theo</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for xe in danh_sach %}
+
+                    <tr>
+
+                        <td>{{ xe.MaXe }}</td>
+
+                        <td>
+                            <strong>{{ xe.BienSo }}</strong>
+                        </td>
+
+                        <td>
+                            {% if xe.LanBaoDuongCuoi %}
+                            {{ xe.LanBaoDuongCuoi.strftime('%d/%m/%Y') }}
+                            {% else %}
+                            Chưa có
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ "{:,.2f}".format(xe.TongKmTrongSo) }}
+                        </td>
+
+                        <td>
+                            {{ xe.SoNgayGiam }}
+                        </td>
+
+                        <td>
+                            {% if xe.NgayBaoDuongTiepTheo %}
+                            {{ xe.NgayBaoDuongTiepTheo.strftime('%d/%m/%Y') }}
+                            {% else %}
+                            Chưa xác định
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if xe.MaBaoDuongGanNhat %}
+
+                            <div class="bao-duong-action-group">
+
+                                <a href="{{ url_for('sua_bao_duong', ma_bao_duong=xe.MaBaoDuongGanNhat) }}"
+                                    class="bao-duong-btn-edit">
+                                    ✏️ Sửa
+                                </a>
+
+                                <form action="{{ url_for('xoa_bao_duong', ma_bao_duong=xe.MaBaoDuongGanNhat) }}"
+                                    method="POST" class="bao-duong-delete-form"
+                                    onsubmit="return confirm('Bạn có chắc muốn xóa lần bảo dưỡng hoàn thành gần nhất của xe {{ xe.BienSo }}? Lịch bảo dưỡng sẽ được tính lại.');">
+
+                                    <button type="submit" class="bao-duong-btn-delete">
+                                        🗑️ Xóa
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                            {% else %}
+
+                            <a href="{{ url_for('them_bao_duong') }}" class="bao-duong-btn-add">
+                                ➕ Thêm
+                            </a>
+
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if xe.TrangThaiBaoDuong == 'Quá hạn' %}
+
+                            <span class="bao-duong-status danger">
+                                🔴 Quá hạn
+                            </span>
+
+                            {% elif xe.TrangThaiBaoDuong == 'Chưa có lịch sử bảo dưỡng' %}
+
+                            <span class="bao-duong-status warning">
+                                🟡 Chưa có lịch sử
+                            </span>
+
+                            {% else %}
+
+                            <span class="bao-duong-status success">
+                                🟢 Chưa đến hạn
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="8" class="empty-message">
+                            Chưa có dữ liệu bảo dưỡng.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

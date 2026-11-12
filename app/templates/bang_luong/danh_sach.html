@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}
+Bảng lương tài xế
+{% endblock %}
+
+{% block content %}
+
+<div class="bang-luong-page">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="bang-luong-header">
+
+        <div>
+            <h1>💰 Bảng lương tài xế & phụ xe</h1>
+
+            <p>
+                Thống kê và tính lương theo số chuyến
+                hoàn thành trong tháng.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- BỘ LỌC -->
+    <div class="bang-luong-filter-card">
+
+        <form method="GET" action="{{ url_for('bang_luong') }}" class="bang-luong-filter-form">
+
+            <div class="bang-luong-filter-group">
+
+                <label for="thang">
+                    Chọn tháng
+                </label>
+
+                <select name="thang" id="thang" required>
+
+                    {% for t in range(1, 13) %}
+
+                    <option value="{{ t }}" {% if t==thang %}selected{% endif %}>
+                        Tháng {{ t }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- CHỌN HOẶC NHẬP NĂM -->
+            <div class="bang-luong-filter-group">
+
+                <label for="nam">
+                    Chọn hoặc nhập năm
+                </label>
+
+                <input type="number" name="nam" id="nam" list="danh-sach-nam" value="{{ nam }}" min="2000" max="2100"
+                    step="1" required class="bang-luong-year-input" placeholder="Chọn hoặc nhập năm">
+
+                <datalist id="danh-sach-nam">
+                    {% for n in ds_nam %}
+                    <option value="{{ n }}"></option>
+                    {% endfor %}
+                </datalist>
+
+            </div>
+
+            <div class="bang-luong-filter-actions">
+
+                <button type="submit" class="bang-luong-btn-search">
+                    🔍 Xem bảng lương
+                </button>
+
+                <a href="{{ url_for('bang_luong') }}" class="bang-luong-btn-reset">
+                    ↻ Hiện tại
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- THỐNG KÊ -->
+    <div class="bang-luong-stats">
+
+        <div class="bang-luong-stat-card">
+
+            <div class="bang-luong-stat-icon">
+                👨‍✈️
+            </div>
+
+            <div class="bang-luong-stat-content">
+
+                <span>
+                    Nhân viên có lương
+                </span>
+
+                <h2>
+                    {{ tong_nhan_vien }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="bang-luong-stat-card">
+
+            <div class="bang-luong-stat-icon">
+                🚌
+            </div>
+
+            <div class="bang-luong-stat-content">
+
+                <span>
+                    Chuyến hoàn thành
+                </span>
+
+                <h2>
+                    {{ tong_chuyen }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="bang-luong-stat-card bang-luong-stat-money">
+
+            <div class="bang-luong-stat-icon">
+                💵
+            </div>
+
+            <div class="bang-luong-stat-content">
+
+                <span>
+                    Tổng quỹ lương
+                </span>
+
+                <h2>
+                    {{ "{:,.0f}".format(tong_quy_luong).replace(",", ".") }}đ
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BẢNG LƯƠNG -->
+    <div class="bang-luong-table-card">
+
+        <div class="bang-luong-table-header">
+
+            <div>
+
+                <h2>
+                    📋 Bảng lương tháng {{ thang }}/{{ nam }}
+                </h2>
+
+                <p>
+                    Lương được tính theo vai trò và
+                    độ phức tạp của tuyến đường.
+                </p>
+
+            </div>
+
+            <span class="bang-luong-count">
+                {{ danh_sach_luong|length }} nhân viên
+            </span>
+
+        </div>
+
+
+        <div class="bang-luong-table-wrapper">
+
+            <table class="bang-luong-table">
+
+                <thead>
+
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã tài xế</th>
+                        <th>Họ và tên</th>
+                        <th>Số chuyến lái</th>
+                        <th>Số chuyến phụ</th>
+                        <th>Tổng chuyến</th>
+                        <th>Tổng lương</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for nv in danh_sach_luong %}
+
+                    <tr>
+
+                        <td>
+                            {{ loop.index }}
+                        </td>
+
+                        <td>
+                            TX{{ "%03d"|format(nv.MaTaiXe) }}
+                        </td>
+
+                        <td class="bang-luong-name">
+                            {{ nv.HoTen }}
+                        </td>
+
+                        <td>
+                            <span class="bang-luong-badge-driver">
+                                {{ nv.SoChuyenLai }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="bang-luong-badge-assistant">
+                                {{ nv.SoChuyenPhu }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ nv.TongSoChuyen }}
+                            </strong>
+                        </td>
+
+                        <td class="bang-luong-money">
+
+                            {{ "{:,.0f}".format(nv.TongLuong).replace(",", ".") }}đ
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="7" class="bang-luong-empty">
+                            Không có dữ liệu nhân viên.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- GHI CHÚ -->
+    <div class="bang-luong-note">
+
+        <h3>ℹ️ Quy tắc tính lương</h3>
+
+        <p>
+            Chỉ tính các chuyến xe có trạng thái
+            <strong>Đã hoàn thành</strong>.
+            Các chuyến đã ẩn vẫn được tính lương.
+        </p>
+
+        <div class="bang-luong-note-grid">
+
+            <div>
+                <strong>Độ phức tạp 1</strong>
+                <span>Tài xế: 400.000đ</span>
+                <span>Phụ xe: 200.000đ</span>
+            </div>
+
+            <div>
+                <strong>Độ phức tạp 2</strong>
+                <span>Tài xế: 600.000đ</span>
+                <span>Phụ xe: 300.000đ</span>
+            </div>
+
+            <div>
+                <strong>Độ phức tạp 3</strong>
+                <span>Tài xế: 800.000đ</span>
+                <span>Phụ xe: 400.000đ</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

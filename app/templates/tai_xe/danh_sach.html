@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Quản lý tài xế</h1>
+        <p>Danh sách tài xế trong hệ thống vận tải hành khách đường dài.</p>
+    </div>
+
+    <a href="{{ url_for('them_tai_xe') }}" class="btn btn-primary">
+        ➕ Thêm tài xế
+    </a>
+
+</div>
+
+<!-- THANH TIM KIEM TAI XE -->
+<div class="search-box">
+
+    <form action="{{ url_for('danh_sach_tai_xe') }}" method="GET" class="search-form">
+
+        <input type="text" name="q" placeholder="Nhập họ tên hoặc số CCCD..." value="{{ tu_khoa }}"
+            class="search-input">
+
+        <button type="submit" class="btn btn-primary">
+            🔍 Tìm kiếm
+        </button>
+
+        <a href="{{ url_for('danh_sach_tai_xe') }}" class="btn btn-secondary">
+            Xóa bộ lọc
+        </a>
+
+    </form>
+
+</div>
+
+<!-- BANG DANH SACH -->
+
+<div class="card">
+
+    <div class="card-header">
+        <h2>Danh sách tài xế</h2>
+        <p>Dữ liệu được lấy trực tiếp từ bảng TAI_XE trong MySQL.</p>
+    </div>
+
+    <div style="overflow-x: auto;">
+
+        <table class="data-table">
+
+            <thead>
+                <tr>
+                    <th>Mã tài xế</th>
+                    <th>Họ và tên</th>
+                    <th>Số CCCD</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for tai_xe in danh_sach %}
+
+                <tr>
+                    <td>{{ tai_xe.MaTaiXe }}</td>
+
+                    <td>
+                        <strong>{{ tai_xe.HoTen }}</strong>
+                    </td>
+
+                    <td>{{ tai_xe.SoCCCD }}</td>
+
+                    <td>
+                        <!-- NUT SUA -->
+                        <a href="{{ url_for('sua_tai_xe', ma_tai_xe=tai_xe.MaTaiXe) }}" class="btn btn-edit">
+                            ✏️ Sửa
+                        </a>
+
+                        <!-- NUT XOA -->
+                        <form action="{{ url_for('xoa_tai_xe', ma_tai_xe=tai_xe.MaTaiXe) }}" method="POST"
+                            style="display: inline;"
+                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài xế {{ tai_xe.HoTen }} không?');">
+                            <button type="submit" class="btn btn-delete">
+                                🗑️ Xóa
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 24px;">
+
+                        {% if tu_khoa %}
+
+                        Không tìm thấy tài xế phù hợp với từ khóa
+                        <strong>{{ tu_khoa }}</strong>.
+
+                        {% else %}
+
+                        Chưa có tài xế nào trong hệ thống.
+
+                        {% endif %}
+
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

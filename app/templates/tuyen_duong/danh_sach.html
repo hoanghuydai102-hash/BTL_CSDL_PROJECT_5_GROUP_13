@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Quản lý tuyến đường</h1>
+        <p>Danh sách các tuyến vận tải hành khách đường dài.</p>
+    </div>
+
+    <a href="{{ url_for('them_tuyen_duong') }}" class="btn btn-primary">
+        ➕ Thêm tuyến đường
+    </a>
+
+</div>
+
+<!-- ==========================================
+     TIM KIEM THEO DIEM DI VA DIEM DEN
+========================================== -->
+
+<div class="search-box">
+
+    <form action="{{ url_for('danh_sach_tuyen_duong') }}" method="GET" class="search-form">
+
+        <!-- DIEM DI -->
+        <input type="text" name="diem_di" placeholder="📍 Nhập điểm đi..." value="{{ diem_di }}" class="search-input">
+
+        <!-- DIEM DEN -->
+        <input type="text" name="diem_den" placeholder="🏁 Nhập điểm đến..." value="{{ diem_den }}"
+            class="search-input">
+
+        <!-- NUT TIM KIEM -->
+        <button type="submit" class="btn btn-primary">
+            🔍 Tìm kiếm
+        </button>
+
+        <!-- XOA BO LOC -->
+        <a href="{{ url_for('danh_sach_tuyen_duong') }}" class="btn btn-secondary">
+            Xóa bộ lọc
+        </a>
+
+    </form>
+
+</div>
+
+<div class="card">
+
+    <div class="card-header">
+        <h2>Danh sách tuyến đường</h2>
+        <p>Dữ liệu được lấy trực tiếp từ MySQL.</p>
+    </div>
+
+    <div style="overflow-x: auto;">
+
+        <table class="data-table">
+
+            <thead>
+                <tr>
+                    <th>Mã tuyến</th>
+                    <th>Tên tuyến đường</th>
+                    <th>Điểm đi</th>
+                    <th>Điểm đến</th>
+                    <th>Chiều dài</th>
+                    <th>Độ phức tạp</th>
+                    <th>Thời gian đi</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for tuyen in danh_sach %}
+
+                <tr>
+                    <td>{{ tuyen.MaTuyenDuong }}</td>
+
+                    <td>
+                        <strong>{{ tuyen.TenTuyenDuong }}</strong>
+                    </td>
+
+                    <td>{{ tuyen.DiemDi }}</td>
+
+                    <td>{{ tuyen.DiemDen }}</td>
+
+                    <td>{{ tuyen.ChieuDai }} km</td>
+
+                    <td>{{ tuyen.DoPhucTap }}</td>
+
+                    <td>{{ tuyen.ThoiGianDi }} giờ</td>
+
+                    <td>
+                        {% if tuyen.TrangThai == 1 %}
+                        <span style="color: #16a34a; font-weight: 600;">
+                            ● Hoạt động
+                        </span>
+                        {% else %}
+                        <span style="color: #dc2626; font-weight: 600;">
+                            ● Ngừng hoạt động
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+
+                            <!-- Nút sửa -->
+                            <a href="{{ url_for('sua_tuyen_duong', ma_tuyen=tuyen.MaTuyenDuong) }}"
+                                class="btn btn-secondary">
+                                ✏️ Sửa
+                            </a>
+
+                            <!-- Nút xóa -->
+                            <form action="{{ url_for('xoa_tuyen_duong', ma_tuyen=tuyen.MaTuyenDuong) }}" method="POST"
+                                style="margin: 0;"
+                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa tuyến đường này không?');">
+                                <button type="submit" class="btn" style="background-color: #dc2626; color: white;">
+                                    🗑️ Xóa
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 24px;">
+
+                        {% if diem_di or diem_den %}
+
+                        Không tìm thấy tuyến đường phù hợp
+                        với điểm đi và điểm đến đã chọn.
+
+                        {% else %}
+
+                        Chưa có tuyến đường nào trong hệ thống.
+
+                        {% endif %}
+
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

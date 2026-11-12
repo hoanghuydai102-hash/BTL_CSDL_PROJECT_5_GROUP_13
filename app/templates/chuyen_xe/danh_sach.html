@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý chuyến xe - QL Vận Tải{% endblock %}
+
+{% block content %}
+
+<!-- =====================================================
+     10 - QUẢN LÝ CHUYẾN XE
+===================================================== -->
+
+<div class="chuyen-xe-container">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="page-heading">
+        <div>
+            {% if che_do_danh_sach|default('hien_tai') == 'da_an' %}
+            <h1>📦 Chuyến xe đã lưu trữ</h1>
+            {% else %}
+            <h1>📅 Quản lý chuyến xe</h1>
+            {% endif %}
+            <p>Tra cứu và quản lý các chuyến xe vận tải hành khách đường dài.</p>
+        </div>
+
+        <div class="page-actions">
+
+            {% if che_do_danh_sach|default('hien_tai') == 'da_an' %}
+
+            <a href="{{ url_for('danh_sach_chuyen_xe') }}" class="chuyen-xe-btn-reset">
+                ← Quay lại danh sách
+            </a>
+
+            {% else %}
+
+            <a href="{{ url_for('them_chuyen_xe') }}" class="chuyen-xe-btn-search">
+                ➕ Thêm chuyến xe
+            </a>
+
+            <a href="{{ url_for('danh_sach_chuyen_duoc_an') }}" class="chuyen-xe-btn-archive">
+                📦 Chuyến đã ẩn
+            </a>
+
+            {% endif %}
+
+            <div class="count-badge">
+                Tổng hiển thị: {{ danh_sach | length }} chuyến
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         FORM TÌM KIẾM VÀ LỌC CHUYẾN XE
+    ===================================================== -->
+    {% if che_do_danh_sach|default('hien_tai') != 'da_an' %}
+
+    <form action="{{ url_for('danh_sach_chuyen_xe') }}" method="GET" class="chuyen-xe-search-form">
+
+        <div class="chuyen-xe-search-grid">
+
+            <!-- TÌM THEO MÃ CHUYẾN -->
+            <div class="chuyen-xe-search-field">
+                <label for="ma_chuyen">Mã chuyến</label>
+
+                <input type="number" id="ma_chuyen" name="ma_chuyen" min="1" placeholder="Nhập mã chuyến"
+                    value="{{ ma_chuyen }}">
+            </div>
+
+
+            <!-- TÌM THEO BIỂN SỐ -->
+            <div class="chuyen-xe-search-field">
+                <label for="bien_so">Biển số xe</label>
+
+                <input type="text" id="bien_so" name="bien_so" placeholder="Nhập biển số xe" value="{{ bien_so }}">
+            </div>
+
+
+            <!-- LỌC THEO TUYẾN ĐƯỜNG -->
+            <div class="chuyen-xe-search-field">
+                <label for="ma_tuyen">Tuyến đường</label>
+
+                <select id="ma_tuyen" name="ma_tuyen">
+
+                    <option value="">-- Tất cả tuyến đường --</option>
+
+                    {% for tuyen in danh_sach_tuyen %}
+
+                    <option value="{{ tuyen.MaTuyenDuong }}" {% if ma_tuyen==tuyen.MaTuyenDuong|string %} selected {%
+                        endif %}>
+                        {{ tuyen.DiemDi }} → {{ tuyen.DiemDen }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+            </div>
+
+
+            <!-- LỌC THEO TRẠNG THÁI -->
+            <div class="chuyen-xe-search-field">
+                <label for="trang_thai">Trạng thái</label>
+
+                <select id="trang_thai" name="trang_thai">
+
+                    <option value="">-- Tất cả trạng thái --</option>
+
+                    <option value="Đã lên lịch" {% if trang_thai=='Đã lên lịch' %}selected{% endif %}>
+                        Đã lên lịch
+                    </option>
+
+                    <option value="Đang chạy" {% if trang_thai=='Đang chạy' %}selected{% endif %}>
+                        Đang chạy
+                    </option>
+
+                    <option value="Đã hoàn thành" {% if trang_thai=='Đã hoàn thành' %}selected{% endif %}>
+                        Đã hoàn thành
+                    </option>
+
+                    <option value="Đã hủy" {% if trang_thai=='Đã hủy' %}selected{% endif %}>
+                        Đã hủy
+                    </option>
+
+                </select>
+            </div>
+
+        </div>
+
+
+        <!-- NÚT TÌM KIẾM -->
+        <div class="chuyen-xe-search-actions">
+
+            <button type="submit" class="chuyen-xe-btn-search">
+                🔍 Tìm kiếm
+            </button>
+
+            <a href="{{ url_for('danh_sach_chuyen_xe') }}" class="chuyen-xe-btn-reset">
+                ↻ Làm mới
+            </a>
+
+        </div>
+
+    </form>
+
+    {% endif %}
+
+    <!-- =====================================================
+         DANH SÁCH CHUYẾN XE
+    ===================================================== -->
+
+    <div class="chuyen-xe-table-section">
+
+        <!-- =====================================================
+     TIÊU ĐỀ BẢNG VÀ ĐIỀU KHIỂN THU PHÓNG
+===================================================== -->
+
+        <div class="chuyen-xe-table-heading">
+
+            <h2>
+                📋 Danh sách chuyến xe
+            </h2>
+
+            <div class="chuyen-xe-table-tools">
+
+                <span class="chuyen-xe-result-count">
+                    {{ danh_sach | length }} kết quả
+                </span>
+
+                <div class="chuyen-xe-zoom-controls">
+
+                    <button type="button" id="chuyenXeZoomOut" class="chuyen-xe-zoom-btn" title="Thu nhỏ bảng">
+                        ➖
+                    </button>
+
+                    <span id="chuyenXeZoomValue">
+                        100%
+                    </span>
+
+                    <button type="button" id="chuyenXeZoomIn" class="chuyen-xe-zoom-btn" title="Phóng to bảng">
+                        ➕
+                    </button>
+
+                    <button type="button" id="chuyenXeZoomReset" class="chuyen-xe-zoom-reset"
+                        title="Khôi phục kích thước mặc định">
+                        ↺
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="chuyen-xe-table">
+
+                <thead>
+                    <tr>
+                        <th>Mã chuyến</th>
+                        <th>Tuyến đường</th>
+                        <th>Biển số xe</th>
+                        <th>Tài xế</th>
+                        <th>Phụ xe</th>
+                        <th>Số khách</th>
+                        <th>Khởi hành</th>
+                        <th>Số km thực tế</th>
+                        <th>Giá vé</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for chuyen in danh_sach %}
+
+                    <tr>
+
+                        <!-- MÃ CHUYẾN -->
+                        <td>
+                            <strong>
+                                {{ chuyen.MaChuyen }}
+                            </strong>
+                        </td>
+
+
+                        <!-- TUYẾN ĐƯỜNG -->
+                        <td class="chuyen-xe-route">
+                            {{ chuyen.DiemDi or 'Chưa có' }}
+                            →
+                            {{ chuyen.DiemDen or 'Chưa có' }}
+                        </td>
+
+
+                        <!-- BIỂN SỐ -->
+                        <td>
+                            {{ chuyen.BienSo or 'Chưa có' }}
+                        </td>
+
+
+                        <!-- TÀI XẾ -->
+                        <td>
+                            {{ chuyen.TenTaiXe or 'Chưa có' }}
+                        </td>
+
+
+                        <!-- PHỤ XE -->
+                        <td>
+                            {{ chuyen.TenPhuXe or 'Chưa có' }}
+                        </td>
+
+
+                        <!-- SỐ KHÁCH -->
+                        <td>
+                            {{ chuyen.SoKhach }}
+                        </td>
+
+
+                        <!-- THỜI GIAN KHỞI HÀNH -->
+                        <td>
+                            {% if chuyen.ThoiGianKhoiHanh %}
+
+                            {{
+                            chuyen.ThoiGianKhoiHanh.strftime(
+                            '%d/%m/%Y %H:%M'
+                            )
+                            }}
+
+                            {% else %}
+
+                            Chưa xác định
+
+                            {% endif %}
+                        </td>
+
+
+                        <!-- SỐ KM THỰC TẾ -->
+                        <td>
+                            {% if chuyen.SoKmThucTe is not none %}
+                            {{ "%.2f"|format(chuyen.SoKmThucTe) }} km
+                            {% else %}
+                            0.00 km
+                            {% endif %}
+                        </td>
+
+
+                        <!-- GIÁ VÉ -->
+                        <td>
+                            {% if chuyen.GiaVe is not none %}
+                            {{ "{:,.0f}".format(chuyen.GiaVe) }} VNĐ
+                            {% else %}
+                            Chưa có
+                            {% endif %}
+                        </td>
+
+
+                        <!-- TRẠNG THÁI -->
+                        <td>
+
+                            {% if chuyen.TrangThai == 'Đã lên lịch' %}
+
+                            <span class="status status-scheduled">
+                                Đã lên lịch
+                            </span>
+
+                            {% elif chuyen.TrangThai == 'Đang chạy' %}
+
+                            <span class="status status-running">
+                                Đang chạy
+                            </span>
+
+                            {% elif chuyen.TrangThai == 'Đã hoàn thành' %}
+
+                            <span class="status status-completed">
+                                Đã hoàn thành
+                            </span>
+
+                            {% elif chuyen.TrangThai == 'Đã hủy' %}
+
+                            <span class="status status-cancelled">
+                                Đã hủy
+                            </span>
+
+                            {% else %}
+
+                            <span class="status status-other">
+                                {{ chuyen.TrangThai or 'Chưa xác định' }}
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!--THAO TÁC CHUYẾN XE -->
+
+
+                        <td>
+
+                            <div class="chuyen-xe-action-group">
+
+                                {% if che_do_danh_sach|default('hien_tai') == 'da_an' %}
+
+                                <!-- KHÔI PHỤC CHUYẾN XE -->
+
+                                <form action="{{ url_for('khoi_phuc_chuyen_xe', ma_chuyen=chuyen.MaChuyen) }}"
+                                    method="POST" class="chuyen-xe-delete-form"
+                                    onsubmit="return confirm('Khôi phục chuyến xe #{{ chuyen.MaChuyen }}?');">
+
+                                    <button type="submit" class="chuyen-xe-btn-restore">
+                                        🔄 Khôi phục
+                                    </button>
+
+                                </form>
+
+                                {% else %}
+
+                                <!-- SỬA CHUYẾN XE -->
+
+                                <a href="{{ url_for('sua_chuyen_xe', ma_chuyen=chuyen.MaChuyen) }}"
+                                    class="chuyen-xe-btn-edit">
+                                    ✏️ Sửa
+                                </a>
+
+
+                                <!-- XÓA CHUYẾN XE CHƯA KHỞI HÀNH -->
+
+                                {% if chuyen.TrangThai == 'Đã lên lịch' %}
+
+                                <form action="{{ url_for('xoa_chuyen_xe', ma_chuyen=chuyen.MaChuyen) }}" method="POST"
+                                    class="chuyen-xe-delete-form"
+                                    onsubmit="return confirm('Xóa vĩnh viễn chuyến xe #{{ chuyen.MaChuyen }}? Thao tác này không thể hoàn tác!');">
+
+                                    {% if now >= chuyen.ThoiGianKhoiHanh %} <button type="submit"
+                                        class="chuyen-xe-btn-delete" disabled>
+                                        🗑️ Xóa
+                                    </button>
+
+                                    {% else %}
+
+                                    <button type="submit" class="chuyen-xe-btn-delete">
+                                        🗑️ Xóa
+                                    </button>
+
+                                    {% endif %}
+
+                                </form>
+
+                                {% endif %}
+
+
+                                <!-- ẨN CHUYẾN XE ĐÃ HOÀN THÀNH / ĐÃ HỦY -->
+
+                                {% if chuyen.TrangThai in ['Đã hoàn thành', 'Đã hủy'] %}
+
+                                <form action="{{ url_for('an_chuyen_xe', ma_chuyen=chuyen.MaChuyen) }}" method="POST"
+                                    class="chuyen-xe-delete-form"
+                                    onsubmit="return confirm('Đưa chuyến xe #{{ chuyen.MaChuyen }} vào danh sách lưu trữ?');">
+
+                                    <button type="submit" class="chuyen-xe-btn-archive">
+                                        📦 Ẩn
+                                    </button>
+
+                                </form>
+
+                                {% endif %}
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="11" class="empty-message">
+                            Không tìm thấy chuyến xe phù hợp.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     JAVASCRIPT - THU PHÓNG BẢNG CHUYẾN XE
+===================================================== -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const table = document.querySelector(".chuyen-xe-table");
+
+        const zoomOut = document.getElementById("chuyenXeZoomOut");
+        const zoomIn = document.getElementById("chuyenXeZoomIn");
+        const zoomReset = document.getElementById("chuyenXeZoomReset");
+        const zoomValue = document.getElementById("chuyenXeZoomValue");
+
+        if (!table || !zoomOut || !zoomIn || !zoomReset || !zoomValue) {
+            return;
+        }
+
+        const MIN_ZOOM = 40;
+        const MAX_ZOOM = 160;
+        const STEP = 10;
+
+        // Đọc mức thu phóng đã lưu
+        let currentZoom = parseInt(
+            localStorage.getItem("chuyenXeTableZoom") || "100",
+            10
+        );
+
+        if (isNaN(currentZoom)) {
+            currentZoom = 100;
+        }
+
+        // Giới hạn mức thu phóng
+        currentZoom = Math.max(
+            MIN_ZOOM,
+            Math.min(MAX_ZOOM, currentZoom)
+        );
+
+        // Áp dụng mức thu phóng
+        function applyZoom() {
+
+            table.style.zoom = currentZoom / 100;
+
+            zoomValue.textContent = currentZoom + "%";
+
+            zoomOut.disabled = currentZoom <= MIN_ZOOM;
+            zoomIn.disabled = currentZoom >= MAX_ZOOM;
+
+            // Ghi nhớ mức thu phóng
+            localStorage.setItem(
+                "chuyenXeTableZoom",
+                currentZoom
+            );
+        }
+
+        // Thu nhỏ
+        zoomOut.addEventListener("click", function () {
+
+            if (currentZoom > MIN_ZOOM) {
+                currentZoom -= STEP;
+                applyZoom();
+            }
+
+        });
+
+        // Phóng to
+        zoomIn.addEventListener("click", function () {
+
+            if (currentZoom < MAX_ZOOM) {
+                currentZoom += STEP;
+                applyZoom();
+            }
+
+        });
+
+        // Đặt lại 100%
+        zoomReset.addEventListener("click", function () {
+
+            currentZoom = 100;
+            applyZoom();
+
+        });
+
+        // Áp dụng khi tải trang
+        applyZoom();
+
+    });
+</script>
+
+{% endblock %}

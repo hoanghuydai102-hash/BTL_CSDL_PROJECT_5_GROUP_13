@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}
+Thống kê doanh thu
+{% endblock %}
+
+{% block content %}
+
+<div class="doanh-thu-page">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="doanh-thu-header">
+
+        <div>
+            <h1>📈 Thống kê doanh thu xe</h1>
+
+            <p>
+                Theo dõi doanh thu của từng xe
+                trong khoảng thời gian được chọn.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- BỘ LỌC -->
+    <div class="doanh-thu-filter-card">
+
+        <form method="GET" action="{{ url_for('doanh_thu') }}" class="doanh-thu-filter-form">
+
+            <div class="doanh-thu-filter-group">
+
+                <label for="tu_ngay">
+                    Từ ngày
+                </label>
+
+                <input type="date" name="tu_ngay" id="tu_ngay" value="{{ tu_ngay }}" required>
+
+            </div>
+
+
+            <div class="doanh-thu-filter-group">
+
+                <label for="den_ngay">
+                    Đến ngày
+                </label>
+
+                <input type="date" name="den_ngay" id="den_ngay" value="{{ den_ngay }}" required>
+
+            </div>
+
+
+            <div class="doanh-thu-filter-actions">
+
+                <button type="submit" class="doanh-thu-btn-search">
+                    🔍 Xem doanh thu
+                </button>
+
+                <a href="{{ url_for('doanh_thu') }}" class="doanh-thu-btn-reset">
+                    ↻ Hiện tại
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- THẺ THỐNG KÊ -->
+    <div class="doanh-thu-stats">
+
+        <div class="doanh-thu-stat-card">
+
+            <div class="doanh-thu-stat-icon">
+                🚌
+            </div>
+
+            <div class="doanh-thu-stat-content">
+
+                <span>
+                    Chuyến hoàn thành
+                </span>
+
+                <h2>
+                    {{ tong_chuyen }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="doanh-thu-stat-card">
+
+            <div class="doanh-thu-stat-icon">
+                👥
+            </div>
+
+            <div class="doanh-thu-stat-content">
+
+                <span>
+                    Tổng hành khách
+                </span>
+
+                <h2>
+                    {{ tong_hanh_khach }}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="doanh-thu-stat-card doanh-thu-stat-money">
+
+            <div class="doanh-thu-stat-icon">
+                💵
+            </div>
+
+            <div class="doanh-thu-stat-content">
+
+                <span>
+                    Tổng doanh thu
+                </span>
+
+                <h2>
+                    {{ "{:,.0f}".format(tong_doanh_thu).replace(",", ".") }}đ
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BẢNG DOANH THU -->
+    <div class="doanh-thu-table-card">
+
+        <div class="doanh-thu-table-header">
+
+            <div>
+
+                <h2>
+                    📋 Doanh thu theo từng xe
+                </h2>
+
+                <p>
+                    Từ {{ tu_ngay }} đến {{ den_ngay }}
+                </p>
+
+            </div>
+
+            <span class="doanh-thu-count">
+                {{ so_xe_co_doanh_thu }} xe có chuyến hoàn thành
+            </span>
+
+        </div>
+
+
+        <div class="doanh-thu-table-wrapper">
+
+            <table class="doanh-thu-table">
+
+                <thead>
+
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã xe</th>
+                        <th>Biển số</th>
+                        <th>Hãng sản xuất</th>
+                        <th>Đời xe</th>
+                        <th>Chuyến hoàn thành</th>
+                        <th>Hành khách</th>
+                        <th>Doanh thu</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for xe in danh_sach_doanh_thu %}
+
+                    <tr>
+
+                        <td>
+                            {{ loop.index }}
+                        </td>
+
+                        <td>
+                            XE{{ "%03d"|format(xe.MaXe) }}
+                        </td>
+
+                        <td class="doanh-thu-license">
+                            {{ xe.BienSo }}
+                        </td>
+
+                        <td>
+                            {{ xe.HangSanXuat }}
+                        </td>
+
+                        <td>
+                            {{ xe.DoiXe }}
+                        </td>
+
+                        <td>
+                            <span class="doanh-thu-badge-trip">
+                                {{ xe.SoChuyenHoanThanh }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="doanh-thu-badge-passenger">
+                                {{ xe.TongHanhKhach }}
+                            </span>
+                        </td>
+
+                        <td class="doanh-thu-money">
+
+                            {{ "{:,.0f}".format(xe.TongDoanhThu).replace(",", ".") }}đ
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="8" class="doanh-thu-empty">
+                            Chưa có dữ liệu xe.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- GHI CHÚ -->
+    <div class="doanh-thu-note">
+
+        <h3>ℹ️ Quy tắc tính doanh thu</h3>
+
+        <p>
+            Doanh thu của từng xe được tính bằng tổng
+            <strong>Số khách × Giá vé</strong>
+            của các chuyến có trạng thái
+            <strong>Đã hoàn thành</strong>
+            trong khoảng thời gian được chọn.
+        </p>
+
+        <p>
+            Các chuyến đã ẩn vẫn được tính doanh thu.
+            Chuyến đang chạy, đã hủy hoặc chưa khởi hành
+            không được tính.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

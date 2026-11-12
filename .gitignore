@@ -29,3 +29,6 @@ backup/
 
 # Code sao luu cu
 app/app_before/
+
+# Code Streamlit thu nghiem cu
+app/pages/

@@ -185,7 +185,7 @@ Các bảng được liên kết thông qua khóa chính và khóa ngoại nhằ
 - Đề tài: Project 5 – Quản lý hãng vận tải hành khách đường dài.
 - Giảng viên hướng dẫn: Nguyễn Việt Dũng.
 - Lớp: INT1313-20261-06.
-- Nhóm: Cở Sở Dữ Liệu - 06.
+- Nhóm: 13.
 
 | STT |      Họ và tên      | Mã sinh viên |
 |-----|---------------------|--------------|
